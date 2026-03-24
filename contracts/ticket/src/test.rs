@@ -12,7 +12,15 @@ fn setup_test_ticket(
     ticket_id: u64,
     status: TicketStatus,
 ) {
-    setup_test_ticket_with_transferable(env, contract_id, organizer, owner, ticket_id, status, true);
+    setup_test_ticket_with_transferable(
+        env,
+        contract_id,
+        organizer,
+        owner,
+        ticket_id,
+        status,
+        true,
+    );
 }
 
 // Helper function to create a ticket with custom transferable setting
