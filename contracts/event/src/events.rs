@@ -129,4 +129,3 @@ pub fn emit_registration(
     }
     .publish(env);
 }
-

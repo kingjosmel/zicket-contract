@@ -103,4 +103,3 @@ pub fn emit_revenue_withdrawn(
     }
     .publish(env);
 }
-

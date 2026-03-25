@@ -411,8 +411,7 @@ fn test_payments_privacy_default_is_standard() {
     let env = Env::default();
     env.mock_all_auths();
 
-    let (_admin, _token, client, _contract_id, _token_contract) =
-        setup_contract_with_token(&env);
+    let (_admin, _token, client, _contract_id, _token_contract) = setup_contract_with_token(&env);
     let event_id = symbol_short!("EVENT1");
 
     let level = client.get_event_privacy(&event_id);
