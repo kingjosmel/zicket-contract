@@ -1,5 +1,5 @@
 use crate::errors::PaymentError;
-use crate::types::{PaymentRecord, Ticket};
+use crate::types::{PaymentRecord, PrivacyLevel, Ticket};
 use soroban_sdk::{contracttype, Address, Env, Symbol, Vec};
 
 #[contracttype]
@@ -14,6 +14,7 @@ pub enum DataKey {
     WithdrawalHistory(Symbol),
     NextPaymentId,
     NextTicketId,
+    EventPrivacy(Symbol),
 }
 
 /// Get the admin address from storage.
@@ -246,4 +247,19 @@ pub fn get_withdrawal_history(env: &Env, event_id: &Symbol) -> Vec<crate::types:
 pub fn reset_event_revenue(env: &Env, event_id: &Symbol) {
     let key = DataKey::EventRevenue(event_id.clone());
     env.storage().persistent().set(&key, &0i128);
+}
+
+pub fn set_event_privacy(env: &Env, event_id: &Symbol, level: &PrivacyLevel) {
+    let key = DataKey::EventPrivacy(event_id.clone());
+    env.storage().persistent().set(&key, level);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);
+}
+
+pub fn get_event_privacy(env: &Env, event_id: &Symbol) -> PrivacyLevel {
+    env.storage()
+        .persistent()
+        .get(&DataKey::EventPrivacy(event_id.clone()))
+        .unwrap_or(PrivacyLevel::Standard)
 }
