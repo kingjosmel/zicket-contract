@@ -11,6 +11,7 @@ pub trait EventContractTrait {
     ) -> Result<(), crate::errors::FactoryError>;
 }
 
+#[allow(dead_code)]
 pub fn deploy_event(
     env: &Env,
     organizer: &Address,

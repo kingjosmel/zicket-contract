@@ -19,3 +19,12 @@ pub struct PaymentRecord {
     pub status: PaymentStatus,
     pub paid_at: u64,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Ticket {
+    pub ticket_id: u64,
+    pub event_id: Symbol,
+    pub owner: Address,
+    pub payment_id: u64,
+}

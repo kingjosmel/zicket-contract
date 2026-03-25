@@ -1,15 +1,18 @@
 use crate::errors::PaymentError;
-use crate::types::PaymentRecord;
-use soroban_sdk::{contracttype, Env, Symbol, Vec};
+use crate::types::{PaymentRecord, Ticket};
+use soroban_sdk::{contracttype, Address, Env, Symbol, Vec};
 
 #[contracttype]
 pub enum DataKey {
     Admin,
     AcceptedToken,
     Payment(u64),
+    Ticket(u64),
     EventPayments(Symbol),
     EventRevenue(Symbol),
+    OwnerTickets(Address),
     NextPaymentId,
+    NextTicketId,
 }
 
 /// Get the admin address from storage.
@@ -74,6 +77,25 @@ pub fn get_next_payment_id(env: &Env) -> u64 {
     next_id
 }
 
+/// Get the next ticket ID and increment it.
+pub fn get_next_ticket_id(env: &Env) -> u64 {
+    let current_id: u64 = env
+        .storage()
+        .persistent()
+        .get(&DataKey::NextTicketId)
+        .unwrap_or(0);
+    let next_id = current_id + 1;
+    env.storage()
+        .persistent()
+        .set(&DataKey::NextTicketId, &next_id);
+    env.storage().persistent().extend_ttl(
+        &DataKey::NextTicketId,
+        60 * 60 * 24 * 30,
+        60 * 60 * 24 * 30 * 2,
+    );
+    next_id
+}
+
 /// Save a payment record to storage
 pub fn save_payment(env: &Env, payment: &PaymentRecord) {
     let key = DataKey::Payment(payment.payment_id);
@@ -89,6 +111,46 @@ pub fn get_payment(env: &Env, payment_id: u64) -> Result<PaymentRecord, PaymentE
         .persistent()
         .get(&DataKey::Payment(payment_id))
         .ok_or(PaymentError::PaymentNotFound)
+}
+
+/// Save a ticket record to storage.
+pub fn save_ticket(env: &Env, ticket: &Ticket) {
+    let key = DataKey::Ticket(ticket.ticket_id);
+    env.storage().persistent().set(&key, ticket);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);
+}
+
+/// Get a ticket record by ID.
+pub fn get_ticket(env: &Env, ticket_id: u64) -> Result<Ticket, PaymentError> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::Ticket(ticket_id))
+        .ok_or(PaymentError::TicketNotFound)
+}
+
+/// Add a ticket ID to the list of tickets for an owner.
+pub fn add_owner_ticket(env: &Env, owner: &Address, ticket_id: u64) {
+    let key = DataKey::OwnerTickets(owner.clone());
+    let mut tickets: Vec<u64> = env
+        .storage()
+        .persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env));
+    tickets.push_back(ticket_id);
+    env.storage().persistent().set(&key, &tickets);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);
+}
+
+/// Get all ticket IDs for an owner.
+pub fn get_owner_tickets(env: &Env, owner: &Address) -> Vec<u64> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::OwnerTickets(owner.clone()))
+        .unwrap_or_else(|| Vec::new(env))
 }
 
 /// add a payment id to the list of payments for an event
@@ -128,6 +190,14 @@ pub fn add_event_revenue(env: &Env, event_id: &Symbol, amount: i128) {
     let new_revenue = current_revenue + amount;
     let key = DataKey::EventRevenue(event_id.clone());
     env.storage().persistent().set(&key, &new_revenue);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);
+}
+
+pub fn set_event_revenue(env: &Env, event_id: &Symbol, amount: i128) {
+    let key = DataKey::EventRevenue(event_id.clone());
+    env.storage().persistent().set(&key, &amount);
     env.storage()
         .persistent()
         .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);

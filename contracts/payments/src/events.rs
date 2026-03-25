@@ -16,6 +16,13 @@ pub struct PaymentRefunded {
     pub amount: i128,
 }
 
+#[contractevent(data_format = "vec", topics = ["ticket_issued"])]
+pub struct TicketIssued {
+    pub ticket_id: u64,
+    pub event_id: Symbol,
+    pub owner: Address,
+}
+
 pub fn emit_payment_received(
     env: &Env,
     payment_id: u64,
@@ -27,6 +34,22 @@ pub fn emit_payment_received(
         payment_id,
         event_id,
         payer,
+        amount,
+    }
+    .publish(env);
+}
+
+#[contractevent(data_format = "vec", topics = ["withdrawal"])]
+pub struct RevenueWithdrawn {
+    pub event_id: Symbol,
+    pub organizer: Address,
+    pub amount: i128,
+}
+
+pub fn emit_revenue_withdrawn(env: &Env, event_id: Symbol, organizer: Address, amount: i128) {
+    RevenueWithdrawn {
+        event_id,
+        organizer,
         amount,
     }
     .publish(env);
@@ -44,6 +67,15 @@ pub fn emit_payment_refunded(
         event_id,
         payer,
         amount,
+    }
+    .publish(env);
+}
+
+pub fn emit_ticket_issued(env: &Env, ticket_id: u64, event_id: Symbol, owner: Address) {
+    TicketIssued {
+        ticket_id,
+        event_id,
+        owner,
     }
     .publish(env);
 }
