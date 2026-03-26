@@ -3,6 +3,13 @@ use crate::types::{EventStatus, PaymentRecord, Ticket};
 use soroban_sdk::{contracttype, Address, Env, Symbol, Vec};
 
 #[contracttype]
+#[derive(Clone)]
+pub struct EventPrivacyConfig {
+    pub allow_anonymous: bool,
+    pub requires_verification: bool,
+}
+
+#[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EventConfig {
     pub organizer: Address,
@@ -16,6 +23,7 @@ pub enum DataKey {
     Admin,
     AcceptedToken,
     EventContract,
+    EventPrivacy(Symbol),
     EventConfig(Symbol),
     Payment(u64),
     Ticket(u64),
@@ -95,6 +103,24 @@ pub fn set_event_contract(env: &Env, event_contract: &soroban_sdk::Address) {
         60 * 60 * 24 * 30,
         60 * 60 * 24 * 30 * 2,
     );
+}
+
+pub fn get_event_privacy(env: &Env, event_id: &Symbol) -> EventPrivacyConfig {
+    env.storage()
+        .persistent()
+        .get(&DataKey::EventPrivacy(event_id.clone()))
+        .unwrap_or(EventPrivacyConfig {
+            allow_anonymous: true,
+            requires_verification: false,
+        })
+}
+
+pub fn set_event_privacy(env: &Env, event_id: &Symbol, privacy: &EventPrivacyConfig) {
+    let key = DataKey::EventPrivacy(event_id.clone());
+    env.storage().persistent().set(&key, privacy);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, 60 * 60 * 24 * 30, 60 * 60 * 24 * 30 * 2);
 }
 
 pub fn get_event_config(env: &Env, event_id: &Symbol) -> Option<EventConfig> {

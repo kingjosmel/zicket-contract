@@ -207,6 +207,16 @@ impl EventContract {
         Ok(event)
     }
 
+    pub fn get_allow_anonymous(env: Env, event_id: Symbol) -> bool {
+        storage::get_event(&env, &event_id).unwrap().allow_anonymous
+    }
+
+    pub fn get_requires_verification(env: Env, event_id: Symbol) -> bool {
+        storage::get_event(&env, &event_id)
+            .unwrap()
+            .requires_verification
+    }
+
     /// Add a new ticket tier to an Upcoming event. Only the organizer can do this.
     pub fn add_ticket_tier(
         env: Env,
@@ -516,6 +526,7 @@ impl EventContract {
         attendee: Address,
         event_id: Symbol,
         tier_id: u32,
+        is_verified: bool,
     ) -> Result<(), EventError> {
         attendee.require_auth();
 
@@ -571,7 +582,14 @@ impl EventContract {
 
         if tier.price > 0 {
             let payments_client = PaymentsContractClient::new(&env, &payments_contract);
-            payments_client.pay_for_ticket(&attendee, &event_id, &tier.price);
+            // This call must succeed before minting and local registration persist.
+            payments_client.pay_for_ticket_with_options(
+                &attendee,
+                &event_id,
+                &tier.price,
+                &false,
+                &is_verified,
+            );
         }
 
         let ticket_client = TicketContractClient::new(&env, &ticket_contract);
