@@ -1,11 +1,13 @@
 use soroban_sdk::{contractevent, Address, Env, Symbol};
 
-use crate::types::{CreateEventParams, Event, EventStatus};
+use crate::types::{
+    mask_address, CreateEventParams, Event, EventStatus, MaskedAddress, PrivacyLevel,
+};
 
 #[contractevent(data_format = "vec", topics = ["created"])]
 pub struct EventCreated {
     pub event_id: Symbol,
-    pub organizer: Address,
+    pub organizer: MaskedAddress,
     pub name: soroban_sdk::String,
     pub venue: soroban_sdk::String,
     pub event_date: u64,
@@ -44,17 +46,17 @@ pub struct RefundsProcessed {
 #[contractevent(data_format = "vec", topics = ["register"])]
 pub struct EventRegistration {
     pub event_id: Symbol,
-    pub attendee: Address,
+    pub attendee: MaskedAddress,
     pub tier_id: u32,
     pub tickets_sold: u32,
 }
 
 /// Publish a Soroban event when a new event is created.
-/// Includes all relevant event data for frontend integration.
+/// The organizer address is masked according to the event's privacy level.
 pub fn emit_event_created(env: &Env, params: &CreateEventParams) {
     EventCreated {
         event_id: params.event_id.clone(),
-        organizer: params.organizer.clone(),
+        organizer: mask_address(env, &params.organizer, params.privacy_level.clone()),
         name: params.name.clone(),
         venue: params.venue.clone(),
         event_date: params.event_date,
@@ -106,16 +108,19 @@ pub fn emit_refunds_processed(env: &Env, event_id: &Symbol, refund_count: u32) {
     .publish(env);
 }
 
+/// Publish a Soroban event when an attendee registers.
+/// The attendee address is masked according to the event's privacy level.
 pub fn emit_registration(
     env: &Env,
     event_id: &Symbol,
     attendee: &Address,
+    privacy_level: PrivacyLevel,
     tier_id: u32,
     tickets_sold: u32,
 ) {
     EventRegistration {
         event_id: event_id.clone(),
-        attendee: attendee.clone(),
+        attendee: mask_address(env, attendee, privacy_level),
         tier_id,
         tickets_sold,
     }

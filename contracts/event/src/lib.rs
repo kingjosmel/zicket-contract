@@ -98,6 +98,7 @@ impl EventContract {
             tiers,
             status: EventStatus::Upcoming,
             created_at: env.ledger().timestamp(),
+            privacy_level: params.privacy_level.clone(),
         };
 
         save_event(&env, &params.event_id, &event);
@@ -408,7 +409,14 @@ impl EventContract {
         tier.sold += 1;
         event.tiers.set(index, tier.clone());
         update_event(&env, &event_id, &event)?;
-        emit_registration(&env, &event_id, &attendee, tier_id, tier.sold);
+        emit_registration(
+            &env,
+            &event_id,
+            &attendee,
+            event.privacy_level.clone(),
+            tier_id,
+            tier.sold,
+        );
 
         Ok(())
     }

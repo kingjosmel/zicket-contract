@@ -126,7 +126,13 @@ impl TicketContract {
             .persistent()
             .set(&DataKey::OwnerTickets(to.clone()), &to_tickets);
 
-        events::emit_ticket_transferred(&env, ticket_id, from, to);
+        events::emit_ticket_transferred(
+            &env,
+            ticket_id,
+            from,
+            to,
+            privacy_utils::PrivacyLevel::Standard,
+        );
 
         Ok(())
     }

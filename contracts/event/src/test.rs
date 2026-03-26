@@ -1,5 +1,7 @@
 use crate::errors::EventError;
-use crate::types::{CreateEventParams, EventStatus, TicketTierParams, UpdateEventParams};
+use crate::types::{
+    CreateEventParams, EventStatus, PrivacyLevel, TicketTierParams, UpdateEventParams,
+};
 use crate::{EventContract, EventContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::{token, Address, Env, String, Symbol};
@@ -67,6 +69,7 @@ fn test_create_event_duplicate_fails() {
         venue: venue.clone(),
         event_date,
         initial_tiers: initial_tiers.clone(),
+        privacy_level: PrivacyLevel::Standard,
     };
 
     // First creation succeeds
@@ -81,6 +84,7 @@ fn test_create_event_duplicate_fails() {
         venue: venue.clone(),
         event_date,
         initial_tiers,
+        privacy_level: PrivacyLevel::Standard,
     };
     let result = client.try_create_event(&params_dup);
     assert_eq!(result.err(), Some(Ok(EventError::EventAlreadyExists)));
@@ -108,6 +112,7 @@ fn test_create_event_invalid_tickets_fails() {
                 capacity: 0, // Invalid
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -136,6 +141,7 @@ fn test_create_event_too_many_tickets_fails() {
                 capacity: 100_000, // Invalid limit
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -164,6 +170,7 @@ fn test_create_event_past_date_fails() {
                 capacity: 100,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -192,6 +199,7 @@ fn test_create_event_date_less_than_24h_fails() {
                 capacity: 100,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -220,6 +228,7 @@ fn test_create_event_negative_price_fails() {
                 capacity: 100,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -248,6 +257,7 @@ fn test_create_event_empty_name_fails() {
                 capacity: 100,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -276,6 +286,7 @@ fn test_create_event_empty_venue_fails() {
                 capacity: 100,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
 
     let result = client.try_create_event(&params);
@@ -652,6 +663,7 @@ fn test_register_for_event_sold_out_fails() {
                 capacity: 1,
             },
         ],
+        privacy_level: PrivacyLevel::Standard,
     };
     client.create_event(&params);
     client.update_event_status(&organizer, &event_id, &EventStatus::Active);
@@ -750,6 +762,7 @@ fn setup_event(env: &Env, client: &EventContractClient, organizer: &Address) -> 
         venue,
         event_date,
         initial_tiers,
+        privacy_level: PrivacyLevel::Standard,
     };
 
     client.create_event(&params);

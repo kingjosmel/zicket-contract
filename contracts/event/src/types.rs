@@ -1,3 +1,4 @@
+pub use privacy_utils::{mask_address, MaskedAddress, PrivacyLevel};
 use soroban_sdk::{contracttype, Address, String, Symbol, Vec};
 
 #[contracttype]
@@ -39,6 +40,7 @@ pub struct Event {
     pub tiers: Vec<TicketTier>,
     pub status: EventStatus,
     pub created_at: u64,
+    pub privacy_level: PrivacyLevel,
 }
 
 #[contracttype]
@@ -51,6 +53,7 @@ pub struct CreateEventParams {
     pub venue: String,
     pub event_date: u64,
     pub initial_tiers: Vec<TicketTierParams>,
+    pub privacy_level: PrivacyLevel,
 }
 
 #[contracttype]

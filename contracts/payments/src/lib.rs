@@ -85,7 +85,14 @@ impl PaymentsContract {
         storage::add_event_payment(&env, &event_id, payment_id);
         storage::add_event_revenue(&env, &event_id, amount);
 
-        events::emit_payment_received(&env, payment_id, event_id, payer, amount);
+        events::emit_payment_received(
+            &env,
+            payment_id,
+            event_id,
+            payer,
+            amount,
+            privacy_utils::PrivacyLevel::Standard,
+        );
 
         let ticket_id = storage::get_next_ticket_id(&env);
         let ticket = Ticket {
@@ -96,7 +103,13 @@ impl PaymentsContract {
         };
         storage::save_ticket(&env, &ticket);
         storage::add_owner_ticket(&env, &payment.payer, ticket_id);
-        events::emit_ticket_issued(&env, ticket_id, payment.event_id, payment.payer);
+        events::emit_ticket_issued(
+            &env,
+            ticket_id,
+            payment.event_id,
+            payment.payer,
+            privacy_utils::PrivacyLevel::Standard,
+        );
 
         Ok(payment_id)
     }
@@ -136,6 +149,7 @@ impl PaymentsContract {
             payment.event_id,
             payment.payer,
             payment.amount,
+            privacy_utils::PrivacyLevel::Standard,
         );
 
         Ok(())
@@ -179,7 +193,13 @@ impl PaymentsContract {
 
         storage::set_event_revenue(&env, &event_id, 0);
 
-        events::emit_revenue_withdrawn(&env, event_id, organizer, total);
+        events::emit_revenue_withdrawn(
+            &env,
+            event_id,
+            organizer,
+            total,
+            privacy_utils::PrivacyLevel::Standard,
+        );
 
         Ok(())
     }
