@@ -12,7 +12,6 @@ fn test_initialize() {
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
-    let event_contract = Address::generate(&env);
 
     client.initialize(&admin, &token, &event_contract_id);
 
@@ -36,7 +35,6 @@ fn test_double_initialization() {
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
-    let event_contract = Address::generate(&env);
 
     client.initialize(&admin, &token, &event_contract_id);
 
@@ -62,7 +60,6 @@ fn test_get_nonexistent_payment() {
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
-    let event_contract = Address::generate(&env);
 
     client.initialize(&admin, &token, &event_contract_id);
     let result = client.try_get_payment(&999);
@@ -78,7 +75,6 @@ fn test_get_event_revenue_initial() {
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
-    let event_contract = Address::generate(&env);
 
     client.initialize(&admin, &token, &event_contract_id);
     let event_id = symbol_short!("EVENT1");
@@ -100,7 +96,6 @@ fn setup_contract_with_token(
     let event_contract_id = env.register(MockEventContract, ());
 
     let admin = Address::generate(env);
-    let event_contract = Address::generate(env);
     let token_contract = env.register_stellar_asset_contract_v2(admin.clone());
     let token = token_contract.address();
     client.initialize(&admin, &token, &event_contract_id);
