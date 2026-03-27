@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::*;
-    use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, Symbol};
+    use soroban_sdk::{testutils::Address as _, Address, BytesN, Env};
 
     fn setup_test() -> (Env, FactoryContractClient<'static>, Address, BytesN<32>) {
         let env = Env::default();
