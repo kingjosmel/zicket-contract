@@ -53,7 +53,7 @@ fn test_private_returns_partial_bytes() {
     match masked {
         MaskedAddress::Partial(bytes) => {
             // Must be non-empty and at most 8 bytes
-            assert!(bytes.len() > 0, "Partial bytes must be non-empty");
+            assert!(!bytes.is_empty(), "Partial bytes must be non-empty");
             assert!(bytes.len() <= 8, "Partial bytes must not exceed 8 bytes");
         }
         _ => panic!("Expected MaskedAddress::Partial for Private privacy level"),
