@@ -20,4 +20,8 @@ pub enum EventError {
     TierSoldOut = 14,
     ContractLinksNotConfigured = 15,
     RefundFailed = 16,
+    ReservationNotFound = 17,
+    ReservationExpired = 18,
+    InvalidOrganizer = 19,
+    InvalidPayoutToken = 20,
 }

@@ -13,4 +13,5 @@ soroban-sdk = { workspace = true }
 privacy-utils = { path = "../privacy-utils" }
 
 [dev-dependencies]
+mock-event-contract = { path = "../mock-event" }
 soroban-sdk = { workspace = true, features = ["testutils"] }
